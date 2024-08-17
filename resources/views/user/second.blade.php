@@ -12,19 +12,26 @@
                 <p class="ml-8">お店で検索する</p>
             </div>
 
-                <div class="flex mb-4">
-                    <p class="mr-4">選択中</p>
-                    <ul class="flex">
-                        <template x-for="item in selectedItems" :key="item">
-                            <li class="py-1 flex items-center align-middle">
-                                <span x-text="item" class="flex-grow"></span>
-                                <span @click="removeItem(item)" class="delete-icon">x</span>
-                            </li>
-                        </template>
-                    </ul>
+            <div class="flex mb-4">
+                <p class="mr-4">選択中</p>
 
-                    <div class="clear-all ml-4" @click="resetAll">Clear All</div>
+                <div id="selected-items">
+                    @if (session('selectedItems'))
+                        @foreach (session('selectedItems') as $value)
+                            @php
+                                $types = array_merge(config('genre.bust_types'), config('genre.body_types'));
+                                $text = $types[$value] ?? '不明なタイプ';
+                            @endphp
+                            <div class="selected-item">
+                                {{ $text }} <span class="remove-btn"
+                                    onclick="removeItem(this, '{{ $value }}')">x</span>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
+
+                <div class="clear-all ml-4" @click="resetAll">Clear All</div>
+            </div>
 
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 @foreach ($casts as $cast)
@@ -39,7 +46,7 @@
                             @endforeach
 
                             <div class="text-center p-2 bg-white w-full">
-                                <h2 class="text-lg font-semibold mb-1"> {{ $cast->name}}</h2>
+                                <h2 class="text-lg font-semibold mb-1"> {{ $cast->name }}</h2>
                                 <span>{{ $cast->age }}</span>
                                 <span class="text-xs">店名({{ $cast->shop->shop_name }})</span>
                                 <span class="text-xs">カテゴリー:
@@ -70,55 +77,36 @@
             }
         };
 
-        function checkboxList() {
-            return {
-                selectedItems: [],
+        const bustTypes = @json(config('genre.bust_types'));
+        const bodyTypes = @json(config('genre.body_types'));
 
-                updateSelected(event, item) {
-                    const checkbox = event.target;
-                    const label = document.querySelector(`label[for=${checkbox.id}]`);
+        const itemLabels = Object.assign({}, bustTypes, bodyTypes);
 
-                    if (checkbox.checked) {
-                        this.selectedItems.push(item);
-                        label.classList.add('bg-pink-300');
-                    } else {
-                        this.selectedItems = this.selectedItems.filter(i => i !== item);
-                        label.classList.remove('bg-pink-300');
-                    }
-                },
-
-                removeItem(item) {
-                    // チェックボックスの状態をリセット
-                    const checkboxId = item;
-                    const checkbox = document.getElementById(checkboxId);
-                    const label = document.querySelector(`label[for=${checkboxId}]`);
-
-                    if (checkbox) {
-                        checkbox.checked = false;
-                        label.classList.remove('bg-pink-300');
-                    }
-
-                    // 選択項目から削除する
-                    this.selectedItems = this.selectedItems.filter(i => i !== item);
-                },
-
-                resetAll() {
-                    // 全てのチェックボックスをリセット
-                    this.selectedItems.forEach(item => {
-                        const checkboxId = item;
-                        const checkbox = document.getElementById(checkboxId);
-                        const label = document.querySelector(`label[for=${checkboxId}]`);
-
-                        if (checkbox) {
-                            checkbox.checked = false;
-                            label.classList.remove('bg-pink-300');
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const value = e.target.value;
+                const text = itemLabels[value];
+                const selectedItemsDiv = document.getElementById('selected-items');
+                if (e.target.checked) {
+                    const div = document.createElement('div');
+                    div.classList.add('selected-item');
+                    div.innerHTML =
+                        `${text} <span class="remove-btn" onclick="removeItem(this, '${value}')">x</span>`;
+                    selectedItemsDiv.appendChild(div);
+                } else {
+                    const items = Array.from(selectedItemsDiv.querySelectorAll('.selected-item'));
+                    items.forEach(item => {
+                        if (item.textContent.includes(text)) {
+                            item.remove();
                         }
                     });
-
-                    // 選択項目リストを空にする
-                    this.selectedItems = [];
                 }
-            };
+            });
+        });
+
+        function removeItem(element, value) {
+            document.querySelector(`input[value="${value}"]`).checked = false;
+            element.parentElement.remove();
         }
     </script>
 @endpush

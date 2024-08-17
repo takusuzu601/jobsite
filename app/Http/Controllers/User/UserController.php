@@ -13,19 +13,20 @@ class UserController extends Controller
 
     function sch(Request $request)
     {
-               // フォームから送信された選択されたアイテムの配列を取得
-               $selectedItems = $request->input('items', []);
+        // フォームから送信された選択されたアイテムの配列を取得
+        $selectedItems = $request->input('items', []);
 
-               // セッションに選択されたアイテムを保存
-               $request->session()->flash('selectedItems', $selectedItems);
+        // セッションに選択されたアイテムを保存
+        $request->session()->flash('selectedItems', $selectedItems);
 
-               // ビューにリダイレクト
-               return redirect()->route('test');
+        // ビューにリダイレクト
+        return redirect()->route('test');
     }
 
-    function test(Request $request){
+    function test(Request $request)
+    {
 
-               return view('user.test');
+        return view('user.test');
     }
 
 
@@ -38,6 +39,13 @@ class UserController extends Controller
     // 検索結果ページ
     public function second(Request $request)
     {
+
+        // フォームから送信された選択されたアイテムの配列を取得
+        $selectedItems = $request->input('cast_type', []);
+
+        // セッションに選択されたアイテムを保存
+        $request->session()->flash('selectedItems', $selectedItems);
+
         // トップページの検索パラメータ
         $pref = $request->input('pref');
         $occupation = $request->input('occupation');
@@ -81,13 +89,13 @@ class UserController extends Controller
         if ($age) {
             $age = intval($age);
             $ageRanges = [
-                1 => [18,20],
+                1 => [18, 20],
                 2 => [21, 25],
                 3 => [26, 30],
-                4 => [31,35],
-                5 => [36,40],
+                4 => [31, 35],
+                5 => [36, 40],
                 6 => [41, 45],
-               7 => [46,200],
+                7 => [46, 200],
                 // 必要に応じて他の範囲も追加
             ];
 
@@ -117,8 +125,6 @@ class UserController extends Controller
             'looks' => $looks,
             'persons' => $persons
         ]);
-
-
     }
 
     //キャスト詳細ページ

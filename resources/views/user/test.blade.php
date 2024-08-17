@@ -42,11 +42,9 @@
                         {{ $text }} <span class="remove-btn"
                             onclick="removeItem(this, '{{ $value }}')">x</span>
                     </div>
-                    
                 @endforeach
             @endif
         </div>
-        //testtest
 
         <button type="submit">Submit</button>
     </form>
